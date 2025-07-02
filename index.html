@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Umami Order</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #f44b27;
+      --accent: #222;
+      --background: #fdfdfd;
+      --card-bg: #fff;
+      --green: #2e7d32;
+      --radius: 16px;
+      --shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--background);
+      font-family: 'Inter', sans-serif;
+      color: var(--accent);
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 20px 10px;
+    }
+
+    header img {
+      max-width: 120px;
+      margin-bottom: 10px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0;
+    }
+
+    h2.section-title {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .card p {
+      font-weight: 600;
+      color: var(--primary);
+      margin: 0;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .controls button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .controls span {
+      font-size: 1.1rem;
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .form-section {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 30px 20px;
+      max-width: 600px;
+      margin: 40px auto;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+    }
+
+    label {
+      font-weight: 600;
+    }
+
+    .total {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--green);
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    button.submit {
+      background: var(--green);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 1rem;
+      width: 100%;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    button.submit:hover {
+      background: #1b5e20;
+    }
+
+    @media(max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+        padding: 10px;
+      }
+      header h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="2.png" alt="Umami Logo" />
+    <h1>Order from Umami</h1>
+  </header>
+
+  <h2 class="section-title">Fast Food & Drinks</h2>
+  <div class="grid" id="menu"></div>
+
+  <h2 class="section-title">Combos</h2>
+  <div class="grid" id="combo-menu"></div>
+
+  <div class="form-section">
+    <label for="name">Your Name</label>
+    <input type="text" id="name" placeholder="Enter your name" required/>
+
+    <label for="method">Order Method</label>
+    <select id="method">
+      <option value="pickup">Pickup</option>
+      <option value="delivery">Delivery</option>
+    </select>
+
+    <div id="deliveryDetails" style="display: none;">
+      <label for="location">Location</label>
+      <textarea id="location" placeholder="Where should we deliver to?"></textarea>
+      <label for="phone">Phone Number</label>
+      <input type="text" id="phone" placeholder="Your phone number" />
+    </div>
+
+    <div class="total" id="total">Total: ₦0</div>
+    <button class="submit" onclick="placeOrder()">Place Order via WhatsApp</button>
+  </div>
+
+  <script>
+    const formatPrice = (num) => '₦' + num.toLocaleString();
+
+    const items = [
+      { name: "Cheese Burger", price: 2699 },
+      { name: "Double Cheese Burger", price: 3299 },
+      { name: "Shawarma (Mini)", price: 1950 },
+      { name: "Shawarma (Standard)", price: 2399 },
+      { name: "Shawarma (Double Sausage)", price: 2899 },
+      { name: "5 Piece Chicken Bucket", price: 4900 },
+      { name: "French Fries", price: 1700 },
+      { name: "Pineapple Lime", price: 999 },
+      { name: "Watermelon", price: 999 },
+      { name: "Banana Smoothie", price: 1499 }
+    ];
+
+    const combos = [
+      { name: "Shawarma + Watermelon Drink", price: 2999 },
+      { name: "Pineapple Burger + Fries", price: 5199 },
+      { name: "Fries + Banana Smoothie", price: 2999 },
+      { name: "Chicken Bowl + Fries", price: 6199 }
+    ];
+
+    const quantities = new Array(items.length + combos.length).fill(0);
+    const menuDiv = document.getElementById("menu");
+    const comboMenuDiv = document.getElementById("combo-menu");
+
+    function updateTotal() {
+      const total = quantities.reduce((sum, qty, i) => {
+        const allItems = items.concat(combos);
+        return sum + qty * allItems[i].price;
+      }, 0);
+      document.getElementById("total").textContent = `Total: ${formatPrice(total)}`;
+    }
+
+    function renderMenu(dishList, container, offset = 0) {
+      dishList.forEach((dish, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${dish.name}</h3>
+          <p>${formatPrice(dish.price)}</p>
+          <div class="controls">
+            <button onclick="changeQty(${index + offset}, -1)">−</button>
+            <span id="qty-${index + offset}">0</span>
+            <button onclick="changeQty(${index + offset}, 1)">+</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function changeQty(index, delta) {
+      quantities[index] = Math.max(0, quantities[index] + delta);
+      document.getElementById(`qty-${index}`).textContent = quantities[index];
+      updateTotal();
+    }
+
+    renderMenu(items, menuDiv);
+    renderMenu(combos, comboMenuDiv, items.length);
+
+    document.getElementById("method").addEventListener("change", () => {
+      const method = document.getElementById("method").value;
+      document.getElementById("deliveryDetails").style.display = method === "delivery" ? "block" : "none";
+    });
+
+    function placeOrder() {
+      const name = document.getElementById("name").value.trim();
+      const method = document.getElementById("method").value;
+      const location = document.getElementById("location").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+
+      if (!name) return alert("Enter your name");
+      if (method === "delivery" && (!location || !phone)) return alert("Fill in delivery details");
+
+      const allItems = items.concat(combos);
+      let message = `*New Umami Order*\nName: ${name}\n${method === "delivery" ? `Delivery\nLocation: ${location}\nPhone: ${phone}` : `Pickup`}\n\nItems:\n`;
+      let hasItems = false;
+      let total = 0;
+
+      allItems.forEach((dish, i) => {
+        if (quantities[i] > 0) {
+          hasItems = true;
+          const subtotal = quantities[i] * dish.price;
+          message += `- ${dish.name} x${quantities[i]} = ${formatPrice(subtotal)}\n`;
+          total += subtotal;
+        }
+      });
+
+      if (!hasItems) return alert("Please select at least one item");
+      message += `\nTotal: ${formatPrice(total)}`;
+
+      const encoded = encodeURIComponent(message);
+      window.open(`https://wa.me/2347033889218?text=${encoded}`, '_blank');
+    }
+  </script>
+</body>
+</html>
